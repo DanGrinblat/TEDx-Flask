@@ -18,6 +18,10 @@ app.config['BASIC_AUTH_PASSWORD'] = 'admin'
 
 basic_auth = BasicAuth(app)
 
+@app.route('/')
+def hello_world():
+    return 'Hello World!'
+
 @app.route('/admin')
 @basic_auth.required
 def admin_view():

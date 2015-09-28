@@ -23,7 +23,7 @@ db = SQLAlchemy(app)
 flask_wtf.CsrfProtect(app)
 
 #from app import user
-from app import api, models
+from app import models, app
 admin = Admin(app, name='TEDxCSU Admin', template_mode='bootstrap3')
 
 class AdminModelView(ModelView): #CSRF Protection
