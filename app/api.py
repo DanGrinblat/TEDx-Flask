@@ -1,5 +1,5 @@
 import os
-from flask import Flask, jsonify, abort, make_response, request, g, send_from_directory
+from flask import Flask, jsonify, abort, make_response, request, g, send_from_directory, render_template
 from flask.ext.restful import Api, Resource, reqparse, fields, marshal
 from flask.ext.httpauth import HTTPBasicAuth
 from datetime import datetime
@@ -8,9 +8,20 @@ from config import basedir
 from werkzeug import secure_filename
 from itsdangerous import (TimedJSONWebSignatureSerializer
                           as Serializer, BadSignature, SignatureExpired)
+from flask.ext.basicauth import BasicAuth
 
 api = Api(app)
 auth = HTTPBasicAuth()
+
+app.config['BASIC_AUTH_USERNAME'] = 'admin'
+app.config['BASIC_AUTH_PASSWORD'] = 'admin'
+
+basic_auth = BasicAuth(app)
+
+@app.route('/admin')
+@basic_auth.required
+def admin_view():
+    return render_template('index.html')
 
 @app.route('/api/v1.0/token')
 @auth.login_required
@@ -104,7 +115,8 @@ class UserListAPI(Resource):
                 last_name = args['last_name'],
                 phone = args['phone'],
                 affiliation = args['affiliation'],
-                confirmed_at = datetime.utcnow()
+                dt = datetime.utcnow(),
+                confirmed_at = dt.replace(microsecond = 0)
             )
             user.hash_password(args['password'])
             db.session.add(user)
