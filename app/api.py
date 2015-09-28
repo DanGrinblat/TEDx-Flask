@@ -1,5 +1,5 @@
 import os
-from flask import Flask, jsonify, abort, make_response, request, g, send_from_directory, render_template
+from flask import Flask, jsonify, abort, make_response, request, g, send_from_directory, render_template, redirect
 from flask.ext.restful import Api, Resource, reqparse, fields, marshal
 from flask.ext.httpauth import HTTPBasicAuth
 from datetime import datetime
@@ -20,18 +20,18 @@ basic_auth = BasicAuth(app)
 
 @app.route('/')
 def hello_world():
-    return 'Hello World!'
+    return render_template('index.html')
 
 @app.route('/admin')
 @basic_auth.required
 def admin_view():
-    return render_template('index.html')
+    return redirect('/admin/')
 
 @app.route('/api/v1.0/token')
 @auth.login_required
 def get_auth_token():
     token = g.user.generate_auth_token()
-    return make_response(jsonify( marshal(g.user, user_fields), token=token.decode('ascii') ), 201)
+    return make_response(jsonify( marshal(g.user, user_fields), token=token.decode('ascii') ), 200)
 
 @auth.verify_password
 def verify_password(email_or_token, password):
@@ -72,7 +72,7 @@ user_fields = {
 
 class UserListAPI(Resource):
     decorators = [auth.login_required]
-    
+
     def __init__(self):
         self.reqparse = reqparse.RequestParser()
         #self.reqparse.add_argument('intent', type=str, required=True,
@@ -163,16 +163,16 @@ class UserAPI(Resource):
                         setattr(user, i, args[i])
             if new_password is not None:
                 user.hash_password(new_password)
-                
+
             db.session.commit()
-            return make_response(jsonify(marshal(user, user_fields)), 201)
+            return make_response(jsonify(marshal(user, user_fields)), 200)
         else:
             return make_response(jsonify({'message': 'Password incorrect.'}), 401)
 
 def allowed_file(filename):
     return '.' in filename and \
            filename.rsplit('.', 1)[1] in app.config['ALLOWED_EXTENSIONS']
-            
+
 @app.route('/api/v1.0/user/photo', methods=['GET', 'POST'])
 @auth.login_required
 def upload():
@@ -192,25 +192,25 @@ def upload():
         return make_response(jsonify({'message': 'Invalid file.'}), 400)
     else:
         return jsonify({'photo_url': user.photo_url})
-        
+
 @app.route('/api/v1.0/photo_gallery', methods=['GET'])
 @auth.login_required
 def img_list():
     path = '/api/v1.0/photo_gallery/'
     files = os.listdir(basedir + path)
     return jsonify({'img_list': files})
-    
+
 @app.route('/api/v1.0/event_details/speakers', methods=['GET'])
 @auth.login_required
 def speaker_list():
     path = '/api/v1.0/event_details/speakers/'
     files = os.listdir(basedir + path)
     return jsonify({'img_list': files})
-    
+
 @app.route('/api/v1.0/event_details/speakers/<path:filename>', methods=['GET'])
 def speaker_access(filename):
     return send_from_directory(app.config['SPEAKER_FOLDER'], filename)
-    
+
 @app.route('/api/v1.0/photo_gallery/<path:filename>', methods=['GET'])
 def photo_gallery_access(filename):
     return send_from_directory(app.config['GALLERY_FOLDER'], filename)#jsonify({'img_list': files})
