@@ -23,7 +23,7 @@ db = SQLAlchemy(app)
 flask_wtf.CsrfProtect(app)
 
 #from app import user
-from app import models, app
+from app import api, models
 admin = Admin(app, name='TEDxCSU Admin', template_mode='bootstrap3')
 
 class AdminModelView(ModelView): #CSRF Protection
@@ -36,7 +36,7 @@ class UserView(ModelView):
     form_excluded_columns = ['password_hash']
     can_create = False
     can_export = True
-    
+
     export_max_rows = None
     export_columns = ['id', 'last_name', 'first_name', 'phone', 'email', 'affiliation', 'photo_url']
 
@@ -47,7 +47,7 @@ class UserView(ModelView):
         sort_column = self._get_column_by_idx(view_args.sort)
         if sort_column is not None:
             sort_column = sort_column[0]
-            
+
         _, query = self.get_list(view_args.page, sort_column, view_args.sort_desc, view_args.search,
                                  view_args.filters, execute=False)
 
