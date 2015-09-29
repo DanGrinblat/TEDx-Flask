@@ -9,7 +9,7 @@ from werkzeug import secure_filename
 from itsdangerous import (TimedJSONWebSignatureSerializer
                           as Serializer, BadSignature, SignatureExpired)
 from flask.ext.basicauth import BasicAuth
-
+import json
 api = Api(app)
 auth = HTTPBasicAuth()
 
@@ -172,7 +172,7 @@ class UserAPI(Resource):
 def allowed_file(filename):
     return '.' in filename and \
            filename.rsplit('.', 1)[1] in app.config['ALLOWED_EXTENSIONS']
-
+           
 @app.route('/api/v1.0/user/photo', methods=['GET', 'POST'])
 @auth.login_required
 def upload():
@@ -193,19 +193,74 @@ def upload():
     else:
         return jsonify({'photo_url': user.photo_url})
 
+        
+        
+@app.route('/api/v1.0/event_details/speakers/bios')
+@auth.login_required
+def speaker_bios():
+    path = '/api/v1.0/event_details/speakers/bios'
+    files = os.listdir(basedir + path)
+    structure = {}
+    for file in files:
+        file_path = os.path.join(app.config['BIOS_FOLDER'], file).replace("\\","/")
+        with open(file_path, "r") as current_file:
+            structure[file] = current_file.read()
+    return jsonify(structure)
+    
+@app.route('/api/v1.0/event_details/tents')
+@auth.login_required
+def tents():
+    path = '/api/v1.0/event_details/tents'
+    files = os.listdir(basedir + path)
+    structure = {}
+    for file in files:
+        file_path = os.path.join(app.config['TENTS_FOLDER'], file).replace("\\","/")
+        with open(file_path, "r") as current_file:
+            structure[file] = current_file.read()
+    return jsonify(structure)
+    
+@app.route('/api/v1.0/event_details/itinerary')
+@auth.login_required
+def itinerary():
+    path = '/api/v1.0/event_details/itinerary'
+    files = os.listdir(basedir + path)
+    structure = {}
+    for file in files:
+        file_path = os.path.join(app.config['ITINERARY_FOLDER'], file).replace("\\","/")
+        with open(file_path, "r") as current_file:
+            structure[file] = current_file.read()
+    return jsonify(structure)
+        
 @app.route('/api/v1.0/photo_gallery', methods=['GET'])
 @auth.login_required
 def img_list():
     path = '/api/v1.0/photo_gallery/'
     files = os.listdir(basedir + path)
-    return jsonify({'img_list': files})
+    return jsonify({'file_list': files})
 
 @app.route('/api/v1.0/event_details/speakers', methods=['GET'])
 @auth.login_required
 def speaker_list():
     path = '/api/v1.0/event_details/speakers/'
-    files = os.listdir(basedir + path)
-    return jsonify({'img_list': files})
+    file_list = []
+    for fname in os.listdir(basedir + path):
+        path = os.path.join(path, fname).replace("\\","/")
+        if '.' not in fname:
+            continue
+        file_list.append(fname)
+    return jsonify({'file_list': file_list})
+    
+    #    speaker_path = '/api/v1.0/event_details/speakers'
+    #bios_path = '/api/v1.0/event_details/speakers/bios'
+    #file_list = []
+    #for fname in os.listdir(basedir + speaker_path):
+    #    path = os.path.join(speaker_path, fname).replace("\\","/")
+    #    if '.' not in fname:
+    #        continue
+    #    file_list.append(fname)
+    #for fname in os.listdir(basedir + bios_path):
+    #    file_list.append(fname)
+    
 
 @app.route('/api/v1.0/event_details/speakers/<path:filename>', methods=['GET'])
 def speaker_access(filename):

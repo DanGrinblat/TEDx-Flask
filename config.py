@@ -10,6 +10,9 @@ CSRF_ENABLED = True
 UPLOAD_FOLDER = os.path.join(apidir, 'user_photos')
 GALLERY_FOLDER = os.path.join(apidir, 'photo_gallery')
 SPEAKER_FOLDER = os.path.join(apidir, 'event_details/speakers')
+BIOS_FOLDER = os.path.join(apidir, 'event_details/speakers/bios')
+TENTS_FOLDER = os.path.join(apidir, 'event_details/tents')
+ITINERARY_FOLDER = os.path.join(apidir, 'event_details/itinerary')
 
 #File upload extensions allowed
 ALLOWED_EXTENSIONS = set(['png', 'jpg', 'jpeg', 'gif'])
