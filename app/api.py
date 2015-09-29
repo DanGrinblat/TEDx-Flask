@@ -208,7 +208,7 @@ def speaker_bios():
             structure[file] = current_file.read()
 
     #dictionary = dict.fromkeys(files, fields.String)
-    return jsonify({'bios_list': structure})
+    return jsonify({'file_list': structure})
     
 @app.route('/api/v1.0/event_details/tents')
 @auth.login_required
@@ -220,7 +220,7 @@ def tents():
         file_path = os.path.join(app.config['TENTS_FOLDER'], file).replace("\\","/")
         with open(file_path, "r") as current_file:
             structure[file] = current_file.read()
-    return jsonify(structure)
+    return jsonify({'file_list': structure})
     
 @app.route('/api/v1.0/event_details/itinerary')
 @auth.login_required
@@ -232,7 +232,7 @@ def itinerary():
         file_path = os.path.join(app.config['ITINERARY_FOLDER'], file).replace("\\","/")
         with open(file_path, "r") as current_file:
             structure[file] = current_file.read()
-    return jsonify(structure)
+    return jsonify({'file_list': structure})
         
 @app.route('/api/v1.0/photo_gallery', methods=['GET'])
 @auth.login_required
