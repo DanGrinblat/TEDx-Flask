@@ -26,8 +26,21 @@ flask_wtf.CsrfProtect(app)
 from app import api, models
 admin = Admin(app, name='TEDxCSU Admin', template_mode='bootstrap3')
 
+from flask.ext.basicauth import BasicAuth
+app.config['BASIC_AUTH_USERNAME'] = 'admin'
+app.config['BASIC_AUTH_PASSWORD'] = 'admin'
+
+basic_auth = BasicAuth(app)
+
 class AdminModelView(ModelView): #CSRF Protection
     form_base_class = flask_wtf.Form
+
+    def is_accessible(self):
+        return basic_auth.authenticate()
+
+    def inaccessible_callback(self, name, **kwargs):
+        # redirect to login page if user doesn't have access
+        return basic_auth.challenge()
 
 class UserView(ModelView):
     column_display_pk = True
@@ -36,9 +49,20 @@ class UserView(ModelView):
     form_excluded_columns = ['password_hash']
     can_create = False
     can_export = True
+    #If we need to make any changes, the following 2 can be set to True.
+    can_edit = False
+    can_delete = False
+
 
     export_max_rows = None
     export_columns = ['id', 'last_name', 'first_name', 'phone', 'email', 'affiliation', 'photo_url']
+
+    def is_accessible(self):
+        return basic_auth.authenticate()
+
+    def inaccessible_callback(self, name, **kwargs):
+        # redirect to login page if user doesn't have access
+        return basic_auth.challenge()
 
     def _get_data_for_export(self):
         view_args = self._get_list_extra_args()

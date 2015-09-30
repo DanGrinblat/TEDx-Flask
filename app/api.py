@@ -8,24 +8,14 @@ from config import basedir
 from werkzeug import secure_filename
 from itsdangerous import (TimedJSONWebSignatureSerializer
                           as Serializer, BadSignature, SignatureExpired)
-from flask.ext.basicauth import BasicAuth
+
 import json
 api = Api(app)
 auth = HTTPBasicAuth()
 
-app.config['BASIC_AUTH_USERNAME'] = 'admin'
-app.config['BASIC_AUTH_PASSWORD'] = 'admin'
-
-basic_auth = BasicAuth(app)
-
 @app.route('/')
 def hello_world():
     return render_template('index.html')
-
-@app.route('/admin')
-@basic_auth.required
-def admin_view():
-    return redirect('/admin/')
 
 @app.route('/api/v1.0/token')
 @auth.login_required
@@ -172,7 +162,7 @@ class UserAPI(Resource):
 def allowed_file(filename):
     return '.' in filename and \
            filename.rsplit('.', 1)[1] in app.config['ALLOWED_EXTENSIONS']
-           
+
 @app.route('/api/v1.0/user/photo', methods=['GET', 'POST'])
 @auth.login_required
 def upload():
@@ -193,8 +183,8 @@ def upload():
     else:
         return jsonify({'photo_url': user.photo_url})
 
-        
-        
+
+
 @app.route('/api/v1.0/event_details/speakers/bios')
 @auth.login_required
 def speaker_bios():
@@ -209,7 +199,7 @@ def speaker_bios():
 
     #dictionary = dict.fromkeys(files, fields.String)
     return jsonify({'file_list': structure})
-    
+
 @app.route('/api/v1.0/event_details/tents')
 @auth.login_required
 def tents():
@@ -221,7 +211,7 @@ def tents():
         with open(file_path, "r") as current_file:
             structure[file] = current_file.read()
     return jsonify({'file_list': structure})
-    
+
 @app.route('/api/v1.0/event_details/itinerary')
 @auth.login_required
 def itinerary():
@@ -233,7 +223,7 @@ def itinerary():
         with open(file_path, "r") as current_file:
             structure[file] = current_file.read()
     return jsonify({'file_list': structure})
-        
+
 @app.route('/api/v1.0/photo_gallery', methods=['GET'])
 @auth.login_required
 def img_list():
@@ -252,7 +242,7 @@ def speaker_list():
             continue
         file_list.append(fname)
     return jsonify({'file_list': file_list})
-    
+
     #    speaker_path = '/api/v1.0/event_details/speakers'
     #bios_path = '/api/v1.0/event_details/speakers/bios'
     #file_list = []
@@ -263,7 +253,7 @@ def speaker_list():
     #    file_list.append(fname)
     #for fname in os.listdir(basedir + bios_path):
     #    file_list.append(fname)
-    
+
 
 @app.route('/api/v1.0/event_details/speakers/<path:filename>', methods=['GET'])
 def speaker_access(filename):
