@@ -190,39 +190,52 @@ def upload():
 def speaker_bios():
     path = '/api/v1.0/event_details/speakers/bios'
     files = os.listdir(basedir + path)
+    children = []
     structure = {}
 
     for file in files:
         file_path = os.path.join(app.config['BIOS_FOLDER'], file).replace("\\","/")
         with open(file_path, "r") as current_file:
-            structure[file] = current_file.read()
-
+            children.append({"name": file,
+                            "bio": current_file.read()})
+            #structure[file] = current_file.read()
+    structure["file_list"] = children
     #dictionary = dict.fromkeys(files, fields.String)
-    return jsonify({'file_list': structure})
+    return jsonify(structure)
 
 @app.route('/api/v1.0/event_details/tents')
 @auth.login_required
 def tents():
     path = '/api/v1.0/event_details/tents'
     files = os.listdir(basedir + path)
+    children = []
     structure = {}
+    
     for file in files:
         file_path = os.path.join(app.config['TENTS_FOLDER'], file).replace("\\","/")
         with open(file_path, "r") as current_file:
-            structure[file] = current_file.read()
-    return jsonify({'file_list': structure})
+            children.append({"name": file,  
+                            "description": current_file.read()})
+            #structure[file] = current_file.read()
+    structure["file_list"] = children
+    return jsonify(structure)
 
 @app.route('/api/v1.0/event_details/itinerary')
 @auth.login_required
 def itinerary():
     path = '/api/v1.0/event_details/itinerary'
     files = os.listdir(basedir + path)
+    children = []
     structure = {}
+    
     for file in files:
         file_path = os.path.join(app.config['ITINERARY_FOLDER'], file).replace("\\","/")
         with open(file_path, "r") as current_file:
-            structure[file] = current_file.read()
-    return jsonify({'file_list': structure})
+            children.append({"name": file,  
+                            "description": current_file.read()})
+            #structure[file] = current_file.read()
+    structure["file_list"] = children
+    return jsonify(structure)
 
 @app.route('/api/v1.0/photo_gallery', methods=['GET'])
 @auth.login_required
