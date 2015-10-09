@@ -20,7 +20,7 @@ import flask_wtf, csv, time
 app = Flask(__name__)
 app.config.from_object('config')
 db = SQLAlchemy(app)
-flask_wtf.CsrfProtect(app)
+#flask_wtf.CsrfProtect(app)
 
 #from app import user
 from app import api, models

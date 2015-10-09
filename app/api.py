@@ -86,15 +86,10 @@ class UserListAPI(Resource):
         self.reqparse.add_argument('affiliation', type=str, required=True,
                                    help='No affiliation provided',
                                    location='json')
-        self.reqparse.add_argument('confirmed_at', type=str, default="",
+        self.reqparse.add_argument('confirmed_at', type=str, default="", required=False,
                                    location='json')
         super(UserListAPI, self).__init__()
-
-    #def get(self):
-    #    return {'users': [marshal(user, user_fields) for user in users]}
-
-    #You can ONLY register with user (id 1).
-    #You cannot make an account with duplicate email.
+        
     def post(self):
         args = self.reqparse.parse_args()
         unique_email = args['email']
@@ -104,18 +99,25 @@ class UserListAPI(Resource):
         elif models.User.query.filter_by(email = unique_email).first():
             return make_response(jsonify({'message': 'E-mail already exists.'}), 409)
         else:
+            dt = datetime.utcnow()
             user = models.User(email = unique_email,
                 first_name = args['first_name'],
                 last_name = args['last_name'],
                 phone = args['phone'],
                 affiliation = args['affiliation'],
-                dt = datetime.utcnow(),
                 confirmed_at = dt.replace(microsecond = 0)
             )
             user.hash_password(args['password'])
             db.session.add(user)
             db.session.commit()
             return make_response(jsonify( marshal(user, user_fields), photo_url='user/photo'), 201)
+
+    #def get(self):
+    #    return {'users': [marshal(user, user_fields) for user in users]}
+
+    #You can ONLY register with user (id 1).
+    #You cannot make an account with duplicate email.
+
 
 class UserAPI(Resource):
     decorators = [auth.login_required]
@@ -185,7 +187,7 @@ def upload():
 
 
 
-@app.route('/api/v1.0/event_details/speakers/bios')
+@app.route('/api/v1.0/event_details/speakers/bios', methods=['GET'])
 @auth.login_required
 def speaker_bios():
     path = '/api/v1.0/event_details/speakers/bios'
@@ -203,7 +205,7 @@ def speaker_bios():
     #dictionary = dict.fromkeys(files, fields.String)
     return jsonify(structure)
 
-@app.route('/api/v1.0/event_details/tents')
+@app.route('/api/v1.0/event_details/tents', methods=['GET'])
 @auth.login_required
 def tents():
     path = '/api/v1.0/event_details/tents'
@@ -220,7 +222,7 @@ def tents():
     structure["file_list"] = children
     return jsonify(structure)
 
-@app.route('/api/v1.0/event_details/itinerary')
+@app.route('/api/v1.0/event_details/itinerary', methods=['GET'])
 @auth.login_required
 def itinerary():
     path = '/api/v1.0/event_details/itinerary'
