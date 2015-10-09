@@ -175,12 +175,15 @@ def upload():
             extension = file.filename.rsplit('.', 1)[1]
             sequence = (str(user.id), '.', extension)
             filename = ''.join(sequence)
+            
             file_path = os.path.join(app.config['UPLOAD_FOLDER'], filename)
             file.save(file_path)
-            user.photo_url = file_path
+            
+            file_url_path = os.path.join(app.config['IMAGE_DIR'], filename)
+            user.photo_url = file_url_path
 
             db.session.commit()
-            return jsonify({'photo_url':file_path})
+            return jsonify({'photo_url':file_url_path})
         return make_response(jsonify({'message': 'Invalid file.'}), 400)
     else:
         return jsonify({'photo_url': user.photo_url})
