@@ -50,8 +50,8 @@ class UserView(ModelView):
     can_create = False
     can_export = True
     #If we need to make any changes, the following 2 can be set to True.
-    can_edit = False
-    can_delete = False
+    can_edit = True
+    can_delete = True
 
 
     export_max_rows = None

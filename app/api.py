@@ -89,7 +89,7 @@ class UserListAPI(Resource):
         self.reqparse.add_argument('confirmed_at', type=str, default="", required=False,
                                    location='json')
         super(UserListAPI, self).__init__()
-        
+
     def post(self):
         args = self.reqparse.parse_args()
         unique_email = args['email']
@@ -175,10 +175,10 @@ def upload():
             extension = file.filename.rsplit('.', 1)[1]
             sequence = (str(user.id), '.', extension)
             filename = ''.join(sequence)
-            
+
             file_path = os.path.join(app.config['UPLOAD_FOLDER'], filename)
             file.save(file_path)
-            
+
             file_url_path = os.path.join(app.config['IMAGE_DIR'], filename)
             user.photo_url = file_url_path
 
@@ -200,7 +200,7 @@ def speaker_bios():
 
     for file in files:
         file_path = os.path.join(app.config['BIOS_FOLDER'], file).replace("\\","/")
-        with open(file_path, "r") as current_file:
+        with open(file_path, "r",encoding="utf8", errors='replace') as current_file:
             children.append({"name": file,
                             "bio": current_file.read()})
             #structure[file] = current_file.read()
@@ -215,11 +215,11 @@ def tents():
     files = os.listdir(basedir + path)
     children = []
     structure = {}
-    
+
     for file in files:
         file_path = os.path.join(app.config['TENTS_FOLDER'], file).replace("\\","/")
         with open(file_path, "r") as current_file:
-            children.append({"name": file,  
+            children.append({"name": file,
                             "description": current_file.read()})
             #structure[file] = current_file.read()
     structure["file_list"] = children
@@ -232,11 +232,11 @@ def itinerary():
     files = os.listdir(basedir + path)
     children = []
     structure = {}
-    
+
     for file in files:
         file_path = os.path.join(app.config['ITINERARY_FOLDER'], file).replace("\\","/")
         with open(file_path, "r") as current_file:
-            children.append({"name": file,  
+            children.append({"name": file,
                             "description": current_file.read()})
             #structure[file] = current_file.read()
     structure["file_list"] = children
@@ -280,6 +280,10 @@ def speaker_access(filename):
 @app.route('/api/v1.0/photo_gallery/<path:filename>', methods=['GET'])
 def photo_gallery_access(filename):
     return send_from_directory(app.config['GALLERY_FOLDER'], filename)#jsonify({'img_list': files})
+
+@app.route('/api/v1.0/user_photos/<path:filename>', methods=['GET'])
+def user_photos_access(filename):
+        return send_from_directory(app.config['UPLOAD_FOLDER'], filename)
 
 @app.route('/api/v1.0/countdown', methods=['GET'])
 def get_date():
