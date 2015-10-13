@@ -14,6 +14,7 @@ class User(db.Model):
     confirmed_at = db.Column(db.DateTime())
     affiliation = db.Column(db.String(64))
     photo_url = db.Column(db.String(120))
+    poll_voted = db.Column(db.Boolean)
 	
     #3 days 259200
     def generate_auth_token(self, expiration = 1209600):

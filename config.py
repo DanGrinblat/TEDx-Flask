@@ -13,6 +13,7 @@ SPEAKER_FOLDER = os.path.join(apidir, 'event_details/speakers')
 BIOS_FOLDER = os.path.join(apidir, 'event_details/speakers/bios')
 TENTS_FOLDER = os.path.join(apidir, 'event_details/tents')
 ITINERARY_FOLDER = os.path.join(apidir, 'event_details/itinerary')
+POLL_FOLDER = os.path.join(apidir, 'poll')
 IMAGE_DIR = '/api/v1.0/user_photos'
 
 #File upload extensions allowed

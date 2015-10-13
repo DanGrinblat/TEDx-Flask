@@ -8,7 +8,7 @@ from config import basedir
 from werkzeug import secure_filename
 from itsdangerous import (TimedJSONWebSignatureSerializer
                           as Serializer, BadSignature, SignatureExpired)
-
+import re
 import json
 api = Api(app)
 auth = HTTPBasicAuth()
@@ -155,6 +155,7 @@ class UserAPI(Resource):
                         setattr(user, i, args[i])
             if new_password is not None:
                 user.hash_password(new_password)
+            user.poll_voted = False #Sets user's vote status to false
 
             db.session.commit()
             return make_response(jsonify(marshal(user, user_fields)), 200)
@@ -255,8 +256,7 @@ def speaker_list():
     path = '/api/v1.0/event_details/speakers/'
     file_list = []
     for fname in os.listdir(basedir + path):
-        path = os.path.join(path, fname).replace("\\","/")
-        if '.' not in fname:
+        if '.' not in fname:  #Filters out directories
             continue
         file_list.append(fname)
     return jsonify({'file_list': file_list})
@@ -272,7 +272,49 @@ def speaker_list():
     #for fname in os.listdir(basedir + bios_path):
     #    file_list.append(fname)
 
+@app.route('/api/v1.0/poll', methods=['GET'])
+@auth.login_required
+def poll_view(): #Return poll question and choices
+    path = '/api/v1.0/poll'
+    children = []
+    structure = {}
+    for file in os.listdir(basedir + path):
+        file_path = os.path.join(app.config['POLL_FOLDER'], file).replace("\\","/")
+        with open(file_path, "r") as f:
+            lines = list(f)
 
+    children.append({"question": lines[0].rstrip('\n')})
+    for x in range(1, len(lines)):
+        children.append({"choice_" + str(x): lines[x].rstrip('\n')})
+
+    structure["poll"] = children
+    return jsonify(structure)
+
+@app.route('/api/v1.0/poll/<int:choice>', methods=['GET'])
+@auth.login_required
+def poll_vote(choice):
+    path = '/api/v1.0/poll'
+    user = models.User.query.get(g.user.id)
+    if (user.poll_voted != True):
+        lines = []
+        for file in os.listdir(basedir + path):
+            file_path = os.path.join(app.config['POLL_FOLDER'], file).replace("\\","/")
+            with open(file_path, "r") as infile:
+                for line in infile:
+                    lines.append(line)
+                    
+        if (1 <= choice < len(lines)):
+            lines[choice] = re.sub('(\d+)(?!\d)', lambda x: str(int(x.group(0)) + 1), lines[choice])
+            with open(file_path, 'w') as outfile:
+                for line in lines:
+                    outfile.write(line)
+            #user.poll_voted = True
+            return jsonify({'message': 'You have successfully voted on the poll.'})
+        else:
+            return make_response(jsonify({'message': 'Invalid choice.'}), 400)
+    else:
+        return make_response(jsonify({'message': 'You have already voted on this poll.'}), 400)
+        
 @app.route('/api/v1.0/event_details/speakers/<path:filename>', methods=['GET'])
 def speaker_access(filename):
     return send_from_directory(app.config['SPEAKER_FOLDER'], filename)
