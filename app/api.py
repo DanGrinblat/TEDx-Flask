@@ -35,13 +35,6 @@ def verify_password(email_or_token, password):
     g.user = user
     return True
 
-#Use for database reset
-#@auth.get_password
-#def get_password(username):
-#    if username == 'miguel':
-#        return 'python'
-#    return None
-
 @auth.error_handler
 def unauthorized():
     # return 401
@@ -57,7 +50,6 @@ user_fields = {
     'confirmed_at': fields.String,
     'affiliation': fields.String,
     'photo_url': fields.String
-    #'uri': fields.Url('user')
 }
 
 class UserListAPI(Resource):
@@ -65,9 +57,6 @@ class UserListAPI(Resource):
 
     def __init__(self):
         self.reqparse = reqparse.RequestParser()
-        #self.reqparse.add_argument('intent', type=str, required=True,
-        #                           help='No intent provided',
-        #                           location='json')
         self.reqparse.add_argument('email', type=str, required=True,
                                    help='No e-mail address provided',
                                    location='json')
@@ -111,13 +100,6 @@ class UserListAPI(Resource):
             db.session.add(user)
             db.session.commit()
             return make_response(jsonify( marshal(user, user_fields), photo_url='user/photo'), 201)
-
-    #def get(self):
-    #    return {'users': [marshal(user, user_fields) for user in users]}
-
-    #You can ONLY register with user (id 1).
-    #You cannot make an account with duplicate email.
-
 
 class UserAPI(Resource):
     decorators = [auth.login_required]
@@ -189,8 +171,6 @@ def upload():
     else:
         return jsonify({'photo_url': user.photo_url})
 
-
-
 @app.route('/api/v1.0/event_details/speakers/bios', methods=['GET'])
 @auth.login_required
 def speaker_bios():
@@ -204,9 +184,7 @@ def speaker_bios():
         with open(file_path, "r",encoding="utf8", errors='replace') as current_file:
             children.append({"name": file,
                             "bio": current_file.read()})
-            #structure[file] = current_file.read()
     structure["file_list"] = children
-    #dictionary = dict.fromkeys(files, fields.String)
     return jsonify(structure)
 
 @app.route('/api/v1.0/event_details/tents', methods=['GET'])
@@ -222,7 +200,6 @@ def tents():
         with open(file_path, "r") as current_file:
             children.append({"name": file,
                             "description": current_file.read()})
-            #structure[file] = current_file.read()
     structure["file_list"] = children
     return jsonify(structure)
 
@@ -239,7 +216,6 @@ def itinerary():
         with open(file_path, "r") as current_file:
             children.append({"name": file,
                             "description": current_file.read()})
-            #structure[file] = current_file.read()
     structure["file_list"] = children
     return jsonify(structure)
 
@@ -260,17 +236,6 @@ def speaker_list():
             continue
         file_list.append(fname)
     return jsonify({'file_list': file_list})
-
-    #    speaker_path = '/api/v1.0/event_details/speakers'
-    #bios_path = '/api/v1.0/event_details/speakers/bios'
-    #file_list = []
-    #for fname in os.listdir(basedir + speaker_path):
-    #    path = os.path.join(speaker_path, fname).replace("\\","/")
-    #    if '.' not in fname:
-    #        continue
-    #    file_list.append(fname)
-    #for fname in os.listdir(basedir + bios_path):
-    #    file_list.append(fname)
 
 @app.route('/api/v1.0/poll', methods=['GET'])
 @auth.login_required
